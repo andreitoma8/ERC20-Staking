@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract StakeableToken is ERC20, ERC20Burnable, Ownable {
+contract ERC20Stakeable is ERC20, ERC20Burnable, Ownable {
     struct Staker {
         uint256 deposited;
         uint256 timeOfLastDeposit;
@@ -15,7 +15,9 @@ contract StakeableToken is ERC20, ERC20Burnable, Ownable {
 
     mapping(address => Staker) internal stakers;
 
-    constructor() ERC20("StakeableToken", "STK") {}
+    constructor(string memory _name, string memory _symbol)
+        ERC20(_name, _symbol)
+    {}
 
     function mint(address to, uint256 amount) public onlyOwner {
         _mint(to, amount);
@@ -47,7 +49,13 @@ contract StakeableToken is ERC20, ERC20Burnable, Ownable {
         stakers[msg.sender].timeOfLastDeposit = block.timestamp;
     }
 
-    function _stakeRewards(address _staker) internal {}
+    // function _stakeRewards(address _staker) internal {
+    //     require(stakers[_staker].deposited > 0, "You have no deposit");
+    //     uint256 rewards = calculateRewards(msg.sender);
+    //     require(rewards > 0, "you have no rewards");
+    //     stakers[_staker].deposited += rewards;
+    //     stakers[_stake].timeOfLastDeposit=block.timestamp;
+    // }
 
     function calculateRewards(address _staker)
         public
@@ -60,12 +68,28 @@ contract StakeableToken is ERC20, ERC20Burnable, Ownable {
     }
 
     function withdrawAll() public {
-        _mint(msg.sender, 1);
+        require(stakers[msg.sender].deposited > 0, "You have no deposit");
+        uint256 _rewards = calculateRewards(msg.sender);
+        uint256 _deposit = stakers[msg.sender].deposited;
+        stakers[msg.sender].deposited = 0;
+        stakers[msg.sender].timeOfLastDeposit = 0;
+        uint256 _amount = _rewards + _deposit;
+        _mint(msg.sender, _amount);
     }
 
     function withdrawRewards() public {
-        _mint(msg.sender, 1);
+        uint256 _rewards = calculateRewards(msg.sender);
+        require(_rewards > 0, "You have no rewards");
+        _mint(msg.sender, _rewards);
     }
 
-    function getDepositInfo() public view returns (uint256 _stake) {}
+    function getDepositInfo(address _user)
+        public
+        view
+        returns (uint256 _stake, uint256 _rewards)
+    {
+        _stake = stakers[_user].deposited;
+        _rewards = calculateRewards(_user);
+        return (_stake, _rewards);
+    }
 }
