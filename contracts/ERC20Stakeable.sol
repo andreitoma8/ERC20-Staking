@@ -49,14 +49,6 @@ contract ERC20Stakeable is ERC20, ERC20Burnable, Ownable {
         stakers[msg.sender].timeOfLastDeposit = block.timestamp;
     }
 
-    // function _stakeRewards(address _staker) internal {
-    //     require(stakers[_staker].deposited > 0, "You have no deposit");
-    //     uint256 rewards = calculateRewards(msg.sender);
-    //     require(rewards > 0, "you have no rewards");
-    //     stakers[_staker].deposited += rewards;
-    //     stakers[_stake].timeOfLastDeposit=block.timestamp;
-    // }
-
     function calculateRewards(address _staker)
         public
         view
