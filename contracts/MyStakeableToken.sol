@@ -4,7 +4,7 @@ pragma solidity ^0.8.4;
 import "./ERC20Stakeable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract MyStakeableToken is ERC20Stakeable {
+contract MyStakeableToken is ERC20Stakeable, Ownable {
     constructor(string memory _name, string memory _symbol)
         ERC20Stakeable(_name, _symbol)
     {
