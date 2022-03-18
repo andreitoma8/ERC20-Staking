@@ -1,5 +1,6 @@
 # ERC20Stakeable Smart Contract. (Contract not yet tested!)
 ### The goal is to create a ERC20 Stakeable library easy to implement.
+### This is a work in progres!
 
 Created using [OpenZeppelin](https://openzeppelin.com/) [ERC20](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/ERC20.sol) Smart Contract and [ERC20Burnable](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/extensions/ERC20Burnable.sol) extension.
 
