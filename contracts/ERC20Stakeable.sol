@@ -3,27 +3,36 @@ pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract ERC20Stakeable is ERC20, ERC20Burnable, Ownable {
+contract ERC20Stakeable is ERC20, ERC20Burnable {
+    // Staker info
     struct Staker {
         uint256 deposited;
         uint256 timeOfLastDeposit;
     }
 
+    // Decimals helper
+    uint256 internal constant DECIMALS = 10**18;
+
+    // Rewards per hour. A fraction calculated as x/100.000 to get the percentage
     uint256 public rewardsPerHour = 285; // 0.00285%
 
+    // Helper for ERC20 decimals
+    uint256 public minStake = 10 * DECIMALS;
+
+    // Compounding frequency limit in seconds
+    uint256 public compoundFreq = 86400; //24 hours
+
+    // Mapping of address
     mapping(address => Staker) internal stakers;
 
     constructor(string memory _name, string memory _symbol)
         ERC20(_name, _symbol)
     {}
 
-    function mint(address to, uint256 amount) public onlyOwner {
-        _mint(to, amount);
-    }
-
-    // If staker already was a deposit, the rewards will also be staked on another deposit
+    // If address has no stkae, initiate one. If address already was a stake,
+    // compound the rewards, reset the last time of deposit and then add the deposit.
+    // Burns the amount staked.
     function deposit(uint256 _amount) public {
         require(_amount > 0, "Can't stake nothing");
         require(
@@ -41,6 +50,7 @@ contract ERC20Stakeable is ERC20, ERC20Burnable, Ownable {
         _burn(msg.sender, _amount);
     }
 
+    // Compound the rewards and reset the last time of deposit.
     function stakeRewards() public {
         require(stakers[msg.sender].deposited > 0, "You have no deposit");
         uint256 rewards = calculateRewards(msg.sender);
@@ -49,16 +59,14 @@ contract ERC20Stakeable is ERC20, ERC20Burnable, Ownable {
         stakers[msg.sender].timeOfLastDeposit = block.timestamp;
     }
 
-    function calculateRewards(address _staker)
-        public
-        view
-        returns (uint256 rewards)
-    {
-        return
-            ((((block.timestamp - stakers[_staker].timeOfLastDeposit) / 3600) *
-                stakers[_staker].deposited) * rewardsPerHour) / 100000;
+    // Mints rewards for msg.sender
+    function claimRewards() public {
+        uint256 _rewards = calculateRewards(msg.sender);
+        require(_rewards > 0, "You have no rewards");
+        _mint(msg.sender, _rewards);
     }
 
+    // Withdraw stake and rewards and mints them to the msg.sender
     function withdrawAll() public {
         require(stakers[msg.sender].deposited > 0, "You have no deposit");
         uint256 _rewards = calculateRewards(msg.sender);
@@ -69,12 +77,7 @@ contract ERC20Stakeable is ERC20, ERC20Burnable, Ownable {
         _mint(msg.sender, _amount);
     }
 
-    function withdrawRewards() public {
-        uint256 _rewards = calculateRewards(msg.sender);
-        require(_rewards > 0, "You have no rewards");
-        _mint(msg.sender, _rewards);
-    }
-
+    // Function useful for fron-end that returns user stake and rewards by address
     function getDepositInfo(address _user)
         public
         view
@@ -83,5 +86,16 @@ contract ERC20Stakeable is ERC20, ERC20Burnable, Ownable {
         _stake = stakers[_user].deposited;
         _rewards = calculateRewards(_user);
         return (_stake, _rewards);
+    }
+
+    // Calculate the rewards a staker can claim
+    function calculateRewards(address _staker)
+        internal
+        view
+        returns (uint256 rewards)
+    {
+        return
+            ((((block.timestamp - stakers[_staker].timeOfLastDeposit) / 3600) *
+                stakers[_staker].deposited) * rewardsPerHour) / 100000;
     }
 }
