@@ -50,7 +50,7 @@ contract ERC20Stakeable is ERC20, ERC20Burnable {
         _burn(msg.sender, _amount);
     }
 
-    // Compound the rewards and reset the last time of deposit.
+    // Compound the rewards and reset the last time of deposit
     function stakeRewards() public {
         require(stakers[msg.sender].deposited > 0, "You have no deposit");
         uint256 rewards = calculateRewards(msg.sender);
@@ -63,7 +63,21 @@ contract ERC20Stakeable is ERC20, ERC20Burnable {
     function claimRewards() public {
         uint256 _rewards = calculateRewards(msg.sender);
         require(_rewards > 0, "You have no rewards");
+        stakers[msg.sender].timeOfLastDeposit = block.timestamp;
         _mint(msg.sender, _rewards);
+    }
+
+    // Withdraw specified amount of staked tokens + available rewards
+    function withdraw(uint256 _amount) public {
+        require(
+            stakers[msg.sender].deposited >= _amount,
+            "Can't withdraw more than you have"
+        );
+        uint256 _rewards = calculateRewards(msg.sender);
+        stakers[msg.sender].deposited = -_amount;
+        stakers[msg.sender].timeOfLastDeposit = block.timestamp;
+        _withdrawBalance = _amount + _rewards;
+        _mint(msg.sender, _withdrawBalance);
     }
 
     // Withdraw stake and rewards and mints them to the msg.sender

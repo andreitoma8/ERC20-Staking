@@ -25,9 +25,12 @@ Created using [OpenZeppelin](https://openzeppelin.com/) [ERC20](https://github.c
 ### Disadvantages of the simple design:
 *see else in deposti function*
 
-- Users will either:
-    - Atuomatically compound their rewards when staking on top of their deposit
-    - Have to claim their rewards and then add new tokens on top of their deposit
+- When adding funds on top of a active stake users will either:
+    - Atuomatically compound their rewards
+    - Have to claim their rewards and then add new tokens after
+
+- When withdrawing a specified amount of tokens, users will also automatically withdraw their rewards
+
 
 # How to use?
 
