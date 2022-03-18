@@ -11,17 +11,14 @@ contract ERC20Stakeable is ERC20, ERC20Burnable {
         uint256 timeOfLastDeposit;
     }
 
-    // Decimals helper
-    uint256 internal constant DECIMALS = 10**18;
-
     // Rewards per hour. A fraction calculated as x/100.000 to get the percentage
     uint256 public rewardsPerHour = 285; // 0.00285%
 
-    // Helper for ERC20 decimals
-    uint256 public minStake = 10 * DECIMALS;
+    // Minimum amount to stake
+    uint256 public minStake = 10 * 10**decimals();
 
     // Compounding frequency limit in seconds
-    uint256 public compoundFreq = 86400; //24 hours
+    uint256 public compoundFreq = 14400; //4 hours
 
     // Mapping of address
     mapping(address => Staker) internal stakers;
@@ -34,7 +31,7 @@ contract ERC20Stakeable is ERC20, ERC20Burnable {
     // compound the rewards, reset the last time of deposit and then add the deposit.
     // Burns the amount staked.
     function deposit(uint256 _amount) public {
-        require(_amount > 0, "Can't stake nothing");
+        require(_amount >= minStake, "Amount smaller than minimimum deposit");
         require(
             balanceOf(msg.sender) >= _amount,
             "Can't stake more than you own"
@@ -53,8 +50,12 @@ contract ERC20Stakeable is ERC20, ERC20Burnable {
     // Compound the rewards and reset the last time of deposit
     function stakeRewards() public {
         require(stakers[msg.sender].deposited > 0, "You have no deposit");
+        require(
+            compoundRewardsTimer(msg.sender) == 0,
+            "Tried to compound rewars too soon"
+        );
         uint256 rewards = calculateRewards(msg.sender);
-        require(rewards > 0, "you have no rewards");
+        require(rewards > 0, "You have no rewards");
         stakers[msg.sender].deposited += rewards;
         stakers[msg.sender].timeOfLastDeposit = block.timestamp;
     }
@@ -100,6 +101,22 @@ contract ERC20Stakeable is ERC20, ERC20Burnable {
         _stake = stakers[_user].deposited;
         _rewards = calculateRewards(_user);
         return (_stake, _rewards);
+    }
+
+    function compoundRewardsTimer(address _user)
+        public
+        view
+        returns (uint256 _timer)
+    {
+        if (
+            stakers[_user].timeOfLastDeposit + compoundFreq <= block.timestamp
+        ) {
+            return 0;
+        } else {
+            return
+                (stakers[_user].timeOfLastDeposit + compoundFreq) -
+                block.timestamp;
+        }
     }
 
     // Calculate the rewards a staker can claim
