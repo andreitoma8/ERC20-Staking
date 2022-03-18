@@ -74,9 +74,9 @@ contract ERC20Stakeable is ERC20, ERC20Burnable {
             "Can't withdraw more than you have"
         );
         uint256 _rewards = calculateRewards(msg.sender);
-        stakers[msg.sender].deposited = -_amount;
+        stakers[msg.sender].deposited -= _amount;
         stakers[msg.sender].timeOfLastDeposit = block.timestamp;
-        _withdrawBalance = _amount + _rewards;
+        uint256 _withdrawBalance = _amount + _rewards;
         _mint(msg.sender, _withdrawBalance);
     }
 
