@@ -1,4 +1,4 @@
-# ERC20Stakeable Smart Contract. 
+# ERC20Stakeable Smart Contract. (Contract not yet tested!)
 ### The goal is to create a ERC20 Stakeable library easy to implement.
 
 Created using [OpenZeppelin](https://openzeppelin.com/) [ERC20](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/ERC20.sol) Smart Contract and [ERC20Burnable](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/extensions/ERC20Burnable.sol) extension.
@@ -44,6 +44,7 @@ python3 -m pipx ensurepath
 # restart terminal
 pipx install eth-brownie
 ```
+- A free [Infura](https://infura.io/) Project Id key for Rinkeby Network
 
 ### Instalation 
 
@@ -54,11 +55,14 @@ git clone https://github.com/andreitoma8/ERC20-Staking
 cd ERC20-Staking
 ```
 
-# Deploy to Rinkeby
+### Deploy to Rinkeby
 
-- Add a |.env| file with the same contents of |.env.example|, but replaced with your variables.
+- Add a | .env | file with the same contents of | .env.example |, but replaced with your variables.
 
 - Run the command:
 ```
 brownie run scripts/deploy.py --network rinkeby
 ```
+It will deploy the token, mint 1.000.000 for yourself and verify the Smart Contract on .rinkeby.etherscan.io
+
+### Happy hacking!
