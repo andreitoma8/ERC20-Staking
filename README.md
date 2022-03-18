@@ -47,8 +47,8 @@ pipx install eth-brownie
 Clone this repo:
 
 ```
-git clone 
-cd
+git clone https://github.com/andreitoma8/ERC20-Staking
+cd ERC20-Staking
 ```
 
 # Deploy to Rinkeby
