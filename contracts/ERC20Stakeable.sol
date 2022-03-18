@@ -11,7 +11,7 @@ contract ERC20Stakeable is ERC20, ERC20Burnable {
         uint256 timeOfLastDeposit;
     }
 
-    // Rewards per hour. A fraction calculated as x/100.000 to get the percentage
+    // Rewards per hour. A fraction calculated as x/10.000.000 to get the percentage
     uint256 public rewardsPerHour = 285; // 0.00285%
 
     // Minimum amount to stake
