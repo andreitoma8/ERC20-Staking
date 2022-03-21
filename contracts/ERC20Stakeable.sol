@@ -7,8 +7,13 @@ import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 contract ERC20Stakeable is ERC20, ERC20Burnable {
     // Staker info
     struct Staker {
+        // The deposited tokens of the Staker
         uint256 deposited;
-        uint256 timeOfLastDeposit;
+        // Last time of details update for Deposit
+        uint256 timeOfLastUpdate;
+        // Calculated, but unclaimed rewards. These are calculated each time
+        // a user writes to the contract
+        uint256 unclaimedRewards;
     }
 
     // Rewards per hour. A fraction calculated as x/10.000.000 to get the percentage
@@ -20,15 +25,17 @@ contract ERC20Stakeable is ERC20, ERC20Burnable {
     // Compounding frequency limit in seconds
     uint256 public compoundFreq = 14400; //4 hours
 
-    // Mapping of address
+    // Mapping of address to Staker info
     mapping(address => Staker) internal stakers;
 
+    // Constructor function
     constructor(string memory _name, string memory _symbol)
         ERC20(_name, _symbol)
     {}
 
-    // If address has no stkae, initiate one. If address already was a stake,
-    // compound the rewards, reset the last time of deposit and then add the deposit.
+    // If address has no Staker struct, initiate one. If address already was a stake,
+    // calculate the rewards and add them to unclaimedRewards, reset the last time of
+    // deposit and then add _amount to the already deposited amount.
     // Burns the amount staked.
     function deposit(uint256 _amount) public {
         require(_amount >= minStake, "Amount smaller than minimimum deposit");
@@ -38,37 +45,42 @@ contract ERC20Stakeable is ERC20, ERC20Burnable {
         );
         if (stakers[msg.sender].deposited == 0) {
             stakers[msg.sender].deposited = _amount;
-            stakers[msg.sender].timeOfLastDeposit = block.timestamp;
+            stakers[msg.sender].timeOfLastUpdate = block.timestamp;
+            stakers[msg.sender].unclaimedRewards = 0;
         } else {
             uint256 rewards = calculateRewards(msg.sender);
-            stakers[msg.sender].deposited += (rewards + _amount);
-            stakers[msg.sender].timeOfLastDeposit = block.timestamp;
+            stakers[msg.sender].unclaimedRewards += rewards;
+            stakers[msg.sender].deposited += _amount;
+            stakers[msg.sender].timeOfLastUpdate = block.timestamp;
         }
         _burn(msg.sender, _amount);
     }
 
-    // Compound the rewards and reset the last time of deposit
+    // Compound the rewards and reset the last time of update for Deposit info
     function stakeRewards() public {
         require(stakers[msg.sender].deposited > 0, "You have no deposit");
         require(
             compoundRewardsTimer(msg.sender) == 0,
             "Tried to compound rewars too soon"
         );
-        uint256 rewards = calculateRewards(msg.sender);
-        require(rewards > 0, "You have no rewards");
+        uint256 rewards = calculateRewards(msg.sender) +
+            stakers[msg.sender].unclaimedRewards;
+        stakers[msg.sender].unclaimedRewards = 0;
         stakers[msg.sender].deposited += rewards;
-        stakers[msg.sender].timeOfLastDeposit = block.timestamp;
+        stakers[msg.sender].timeOfLastUpdate = block.timestamp;
     }
 
     // Mints rewards for msg.sender
     function claimRewards() public {
-        uint256 _rewards = calculateRewards(msg.sender);
-        require(_rewards > 0, "You have no rewards");
-        stakers[msg.sender].timeOfLastDeposit = block.timestamp;
-        _mint(msg.sender, _rewards);
+        uint256 rewards = calculateRewards(msg.sender) +
+            stakers[msg.sender].unclaimedRewards;
+        require(rewards > 0, "You have no rewards");
+        stakers[msg.sender].unclaimedRewards = 0;
+        stakers[msg.sender].timeOfLastUpdate = block.timestamp;
+        _mint(msg.sender, rewards);
     }
 
-    // Withdraw specified amount of staked tokens + available rewards
+    // Withdraw specified amount of staked tokens
     function withdraw(uint256 _amount) public {
         require(
             stakers[msg.sender].deposited >= _amount,
@@ -76,18 +88,19 @@ contract ERC20Stakeable is ERC20, ERC20Burnable {
         );
         uint256 _rewards = calculateRewards(msg.sender);
         stakers[msg.sender].deposited -= _amount;
-        stakers[msg.sender].timeOfLastDeposit = block.timestamp;
-        uint256 _withdrawBalance = _amount + _rewards;
-        _mint(msg.sender, _withdrawBalance);
+        stakers[msg.sender].timeOfLastUpdate = block.timestamp;
+        stakers[msg.sender].unclaimedRewards = _rewards;
+        _mint(msg.sender, _amount);
     }
 
-    // Withdraw stake and rewards and mints them to the msg.sender
+    // Withdraw all stake and rewards and mints them to the msg.sender
     function withdrawAll() public {
         require(stakers[msg.sender].deposited > 0, "You have no deposit");
-        uint256 _rewards = calculateRewards(msg.sender);
+        uint256 _rewards = calculateRewards(msg.sender) +
+            stakers[msg.sender].unclaimedRewards;
         uint256 _deposit = stakers[msg.sender].deposited;
         stakers[msg.sender].deposited = 0;
-        stakers[msg.sender].timeOfLastDeposit = 0;
+        stakers[msg.sender].timeOfLastUpdate = 0;
         uint256 _amount = _rewards + _deposit;
         _mint(msg.sender, _amount);
     }
@@ -99,34 +112,36 @@ contract ERC20Stakeable is ERC20, ERC20Burnable {
         returns (uint256 _stake, uint256 _rewards)
     {
         _stake = stakers[_user].deposited;
-        _rewards = calculateRewards(_user);
+        _rewards =
+            calculateRewards(_user) +
+            stakers[msg.sender].unclaimedRewards;
         return (_stake, _rewards);
     }
 
+    // Util function that returns the timer for restaking rewards
     function compoundRewardsTimer(address _user)
         public
         view
         returns (uint256 _timer)
     {
-        if (
-            stakers[_user].timeOfLastDeposit + compoundFreq <= block.timestamp
-        ) {
+        if (stakers[_user].timeOfLastUpdate + compoundFreq <= block.timestamp) {
             return 0;
         } else {
             return
-                (stakers[_user].timeOfLastDeposit + compoundFreq) -
+                (stakers[_user].timeOfLastUpdate + compoundFreq) -
                 block.timestamp;
         }
     }
 
-    // Calculate the rewards a staker can claim
+    // Calculate the rewards since the last update on Deposit info
     function calculateRewards(address _staker)
         internal
         view
         returns (uint256 rewards)
     {
         return
-            ((((block.timestamp - stakers[_staker].timeOfLastDeposit) / 3600) *
-                stakers[_staker].deposited) * rewardsPerHour) / 100000;
+            (((((block.timestamp - stakers[_staker].timeOfLastUpdate) / 3600) *
+                stakers[_staker].deposited) * rewardsPerHour) / 100000) +
+            stakers[_staker].unclaimedRewards;
     }
 }

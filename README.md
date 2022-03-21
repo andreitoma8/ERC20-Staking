@@ -1,15 +1,17 @@
 # ERC20Stakeable Smart Contract. (Contract not yet tested!)
-### The goal is to create a ERC20 Stakeable library easy to implement.
+### The goal is to create a ERC20 Stakeable library easy to implement for any token.
 ### This is a work in progres!
 
 Created using [OpenZeppelin](https://openzeppelin.com/) [ERC20](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/ERC20.sol) Smart Contract and [ERC20Burnable](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/extensions/ERC20Burnable.sol) extension.
+
+Inspired by [Patrick Collins'](https://github.com/PatrickAlphaC) [DeFi-minimal Staking.sol](https://github.com/smartcontractkit/defi-minimal/blob/main/contracts/Staking.sol).
 
 ### Features for users:
 
 1. Deposit the ERC20 Token and gain a fixed APR calculated hourly.
 1. Compound your rewards.
 1. Claim your rewards.
-1. Withdraw your deposit.
+1. Withdraw a part of deposit.
 1. Withdraw all(your deposit + rewards).
 
 ### Features for owner:
@@ -17,21 +19,6 @@ Created using [OpenZeppelin](https://openzeppelin.com/) [ERC20](https://github.c
 1. Set a fixed APR.
 1. Set a minimum stake amount.
 1. Set compounding frequency limit.
-
-### Advantages of the simple design:
-
-- Low gas fees
-- Lower room for error
-
-### Disadvantages of the simple design:
-*see else in deposti function*
-
-- When adding funds on top of a active stake users will either:
-    - Atuomatically compound their rewards
-    - Have to claim their rewards and then add new tokens after
-
-- When withdrawing a specified amount of tokens, users will also automatically withdraw their rewards
-
 
 # How to use?
 
@@ -64,6 +51,9 @@ cd ERC20-Staking
 ```
 brownie run scripts/deploy.py --network rinkeby
 ```
-It will deploy the token, mint 1.000.000 for yourself and verify the Smart Contract on .rinkeby.etherscan.io
+The script will deploy the token, mint 1.000.000 for yourself and verify the Smart Contract on .rinkeby.etherscan.io
 
-### Happy hacking!
+Any feedback is much apreciated! 
+If this was helpful please consider donating: 0xA4Ad17ef801Fa4bD44b758E5Ae8B2169f59B666F
+
+# Happy hacking!
