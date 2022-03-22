@@ -139,9 +139,7 @@ contract ERC20Stakeable is ERC20, ERC20Burnable {
         view
         returns (uint256 rewards)
     {
-        return
-            (((((block.timestamp - stakers[_staker].timeOfLastUpdate) / 3600) *
-                stakers[_staker].deposited) * rewardsPerHour) / 100000) +
-            stakers[_staker].unclaimedRewards;
+        return (((((block.timestamp - stakers[_staker].timeOfLastUpdate) /
+            3600) * stakers[_staker].deposited) * rewardsPerHour) / 100000);
     }
 }
