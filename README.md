@@ -6,6 +6,7 @@ Created using [OpenZeppelin](https://openzeppelin.com/) [ERC20](https://github.c
 
 Inspired by [Patrick Collins'](https://github.com/PatrickAlphaC) [DeFi-minimal Staking.sol](https://github.com/smartcontractkit/defi-minimal/blob/main/contracts/Staking.sol).
 
+
 ### Features for users:
 
 1. Deposit the ERC20 Token and gain a fixed APR calculated hourly.
@@ -20,7 +21,9 @@ Inspired by [Patrick Collins'](https://github.com/PatrickAlphaC) [DeFi-minimal S
 1. Set a minimum stake amount.
 1. Set compounding frequency limit.
 
+
 # How to use?
+
 
 ### Prerequisites:
 
@@ -35,6 +38,7 @@ pipx install eth-brownie
 ```
 - A free [Infura](https://infura.io/) Project Id key for Rinkeby Network
 
+
 ### Installation 
 
 Clone this repo:
@@ -43,6 +47,7 @@ Clone this repo:
 git clone https://github.com/andreitoma8/ERC20-Staking
 cd ERC20-Staking
 ```
+
 
 ### Deploy to Rinkeby
 
@@ -55,11 +60,15 @@ brownie run scripts/deploy.py --network rinkeby
 The script will deploy the token, mint 1.000.000 for yourself and verify the Smart Contract on .rinkeby.etherscan.io
 
 
+
 ##### Any feedback is much apreciated! 
 ##### If this was helpful please consider donating: 
 `0xA4Ad17ef801Fa4bD44b758E5Ae8B2169f59B666F`
 
+
+
 ### Run test locally on Ganache
+
 
 ##### For unning local tests you also need: 
 - [Ganache CLI](https://www.npmjs.com/package/ganache-cli)
@@ -76,6 +85,7 @@ To verify NodeJS installation run
 node --version
 ```
 
+
 ##### Test scripts
 
 - Run the command:
@@ -90,5 +100,6 @@ The test will assert the following:
 1. Compound rewards transaction
 1. Withdraw rewards transaction
 1. Withdraw all transaction
+
 
 # Happy hacking!
