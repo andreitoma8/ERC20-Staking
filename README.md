@@ -45,7 +45,7 @@ cd ERC20-Staking
 
 ### Deploy to Rinkeby
 
-- Add a | .env | file with the same contents of | .env.example |, but replaced with your variables.
+- Add a `.env` file with the same contents of `.env.example`, but replaced with your variables.
 
 - Run the command:
 ```
