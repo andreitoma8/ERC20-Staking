@@ -1,6 +1,6 @@
-# ERC20Stakeable Smart Contract. (Contract not yet tested!)
+# ERC20Stakeable Smart Contract.
 ### The goal is to create a ERC20 Stakeable library easy to implement for any token.
-### This is a work in progres!
+### This Smart Contract is not Audited!
 
 Created using [OpenZeppelin](https://openzeppelin.com/) [ERC20](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/ERC20.sol) Smart Contract and [ERC20Burnable](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/extensions/ERC20Burnable.sol) extension.
 
@@ -24,6 +24,7 @@ Inspired by [Patrick Collins'](https://github.com/PatrickAlphaC) [DeFi-minimal S
 
 ### Prerequisites:
 
+##### Rinkeby deployment
 - [Python](https://www.python.org/downloads/)
 - Brownie
 ```
@@ -53,7 +54,41 @@ brownie run scripts/deploy.py --network rinkeby
 ```
 The script will deploy the token, mint 1.000.000 for yourself and verify the Smart Contract on .rinkeby.etherscan.io
 
-Any feedback is much apreciated! 
-If this was helpful please consider donating: 0xA4Ad17ef801Fa4bD44b758E5Ae8B2169f59B666F
+
+##### Any feedback is much apreciated! 
+##### If this was helpful please consider donating: 
+`0xA4Ad17ef801Fa4bD44b758E5Ae8B2169f59B666F`
+
+### Run test locally on Ganache
+
+##### For unning local tests you also need: 
+- [Ganache CLI](https://www.npmjs.com/package/ganache-cli)
+```
+npm install -g ganache-cli
+```
+or, if you are using Yarn
+```
+yarn global add ganache-cli
+```
+- [NodeJS](https://nodejs.org/en/).
+To verify NodeJS installation run
+```
+node --version
+```
+
+##### Test scripts
+
+- Run the command:
+```
+brownie test testes/test.py
+```
+
+The test will assert the following:
+1. Contract deployment
+1. Initial staking transaction
+1. Rewards calculation in 100 H
+1. Compound rewards transaction
+1. Withdraw rewards transaction
+1. Withdraw all transaction
 
 # Happy hacking!
