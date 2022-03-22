@@ -35,7 +35,7 @@ pipx install eth-brownie
 ```
 - A free [Infura](https://infura.io/) Project Id key for Rinkeby Network
 
-### Instalation 
+### Installation 
 
 Clone this repo:
 
