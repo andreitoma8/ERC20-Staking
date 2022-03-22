@@ -118,7 +118,7 @@ contract ERC20Stakeable is ERC20, ERC20Burnable {
         return (_stake, _rewards);
     }
 
-    // Util function that returns the timer for restaking rewards
+    // Utility function that returns the timer for restaking rewards
     function compoundRewardsTimer(address _user)
         public
         view
