@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: MIT
+// Creator: andreitoma8
 pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
-contract ERC20Stakeable is ERC20, ERC20Burnable {
+contract ERC20Stakeable is ERC20, ERC20Burnable, ReentrancyGuard {
     // Staker info
     struct Staker {
         // The deposited tokens of the Staker
@@ -12,7 +14,7 @@ contract ERC20Stakeable is ERC20, ERC20Burnable {
         // Last time of details update for Deposit
         uint256 timeOfLastUpdate;
         // Calculated, but unclaimed rewards. These are calculated each time
-        // a user writes to the contract
+        // a user writes to the contract.
         uint256 unclaimedRewards;
     }
 
@@ -37,7 +39,7 @@ contract ERC20Stakeable is ERC20, ERC20Burnable {
     // calculate the rewards and add them to unclaimedRewards, reset the last time of
     // deposit and then add _amount to the already deposited amount.
     // Burns the amount staked.
-    function deposit(uint256 _amount) public {
+    function deposit(uint256 _amount) external nonReentrant {
         require(_amount >= minStake, "Amount smaller than minimimum deposit");
         require(
             balanceOf(msg.sender) >= _amount,
@@ -57,7 +59,7 @@ contract ERC20Stakeable is ERC20, ERC20Burnable {
     }
 
     // Compound the rewards and reset the last time of update for Deposit info
-    function stakeRewards() public {
+    function stakeRewards() external nonReentrant {
         require(stakers[msg.sender].deposited > 0, "You have no deposit");
         require(
             compoundRewardsTimer(msg.sender) == 0,
@@ -71,7 +73,7 @@ contract ERC20Stakeable is ERC20, ERC20Burnable {
     }
 
     // Mints rewards for msg.sender
-    function claimRewards() public {
+    function claimRewards() external nonReentrant {
         uint256 rewards = calculateRewards(msg.sender) +
             stakers[msg.sender].unclaimedRewards;
         require(rewards > 0, "You have no rewards");
@@ -81,7 +83,7 @@ contract ERC20Stakeable is ERC20, ERC20Burnable {
     }
 
     // Withdraw specified amount of staked tokens
-    function withdraw(uint256 _amount) public {
+    function withdraw(uint256 _amount) external nonReentrant {
         require(
             stakers[msg.sender].deposited >= _amount,
             "Can't withdraw more than you have"
@@ -94,7 +96,7 @@ contract ERC20Stakeable is ERC20, ERC20Burnable {
     }
 
     // Withdraw all stake and rewards and mints them to the msg.sender
-    function withdrawAll() public {
+    function withdrawAll() external nonReentrant {
         require(stakers[msg.sender].deposited > 0, "You have no deposit");
         uint256 _rewards = calculateRewards(msg.sender) +
             stakers[msg.sender].unclaimedRewards;
@@ -139,7 +141,7 @@ contract ERC20Stakeable is ERC20, ERC20Burnable {
         view
         returns (uint256 rewards)
     {
-        return (((((block.timestamp - stakers[_staker].timeOfLastUpdate) /
-            3600) * stakers[_staker].deposited) * rewardsPerHour) / 10000000);
+        return (((((block.timestamp - stakers[_staker].timeOfLastUpdate) *
+            stakers[_staker].deposited) * rewardsPerHour) / 3600) / 10000000);
     }
 }
